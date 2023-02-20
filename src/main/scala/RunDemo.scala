@@ -15,27 +15,46 @@ import scalapb.spark.ProtoSQL
 object RunDemo {
 
   def main(Args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ScalaPB Demo").getOrCreate()
+    val spark = SparkSession.builder().appName("ScalaPB Demo").config("spark.master", "local").getOrCreate()
 
     val sc = spark.sparkContext
+    val kafkaServers = "localhost:9092"
+    val kafkaTopic = "persons"
 
-    val personsDF: DataFrame = ProtoSQL.createDataFrame(spark, testData)
+    val produce = false
 
-    val personsDS1: Dataset[Person] = personsDF.as[Person]
+    if (produce) {
+      val personsDS2: Dataset[Person] = spark.createDataset(testData)
 
-    val personsDS2: Dataset[Person] = spark.createDataset(testData)
+      // convert to dataset of byte array
+      val binaryDS: Dataset[Array[Byte]] = personsDS2
+        .map(_.toByteArray)
 
-    personsDS1.show()
+      binaryDS.show()
 
-    personsDS2.show()
+      binaryDS
+        .write
+        .format("kafka")
+        .option("kafka.bootstrap.servers", kafkaServers)
+        .option("topic", kafkaTopic)
+        .save()
 
-    personsDF.createOrReplaceTempView("persons")
+    } else {
 
-    spark.sql("SELECT name, age, gender, size(addresses) FROM persons").show()
+      val assetDf = spark
+        .read
+        .format("kafka")
+        .option("kafka.bootstrap.servers", kafkaServers)
+        .option("subscribe", kafkaTopic)
+        .option("startingOffsets", "earliest")
+        .load()
+        .map(row => row.getAs[Array[Byte]]("value"))
+        .map(Person.parseFrom(_))
+        .toDF()
 
-    spark.sql("SELECT name, age, gender, size(addresses) FROM persons WHERE age > 30")
-      .collect
-      .foreach(println)
+      assetDf.show()
+
+    }
   }
 
   val testData: Seq[Person] = Seq(
@@ -48,14 +67,14 @@ object RunDemo {
       _.age := 21,
       _.gender := Gender.MALE,
       _.addresses := Seq(
-          Address(city = Some("San Francisco"), street=Some("3rd Street"))
+        Address(city = Some("San Francisco"), street = Some("3rd Street"))
       )),
     Person().update(
       _.name := "Steven",
       _.gender := Gender.MALE,
       _.addresses := Seq(
-          Address(city = Some("San Francisco"), street=Some("5th Street")),
-          Address(city = Some("Sunnyvale"), street=Some("Wolfe"))
+        Address(city = Some("San Francisco"), street = Some("5th Street")),
+        Address(city = Some("Sunnyvale"), street = Some("Wolfe"))
       )),
     Person().update(
       _.name := "Batya",
