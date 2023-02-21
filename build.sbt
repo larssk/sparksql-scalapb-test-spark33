@@ -4,6 +4,7 @@ scalaVersion := "2.12.14"
 
 version := "1.0.0"
 val sparkVersion = "3.3.0"
+// val sparkVersion = "3.3.2"
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
@@ -17,9 +18,9 @@ libraryDependencies += "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkVersi
 // Hadoop contains an old protobuf runtime that is not binary compatible
 // with 3.0.0.  We shaded ours to prevent runtime issues.
 assemblyShadeRules in assembly := Seq(
-  ShadeRule.rename("com.google.protobuf.**" -> "shadeproto.@1").inAll,
-  ShadeRule.rename("scala.collection.compat.**" -> "scalacompat.@1").inAll,
-  ShadeRule.rename("shapeless.**" -> "shadeshapeless.@1").inAll
+    ShadeRule.rename("com.google.protobuf.**" -> "shadeproto.@1").inAll,
+    ShadeRule.rename("scala.collection.compat.**" -> "scalacompat.@1").inAll,
+    ShadeRule.rename("shapeless.**" -> "shadeshapeless.@1").inAll
 )
 
 PB.targets in Compile := Seq(

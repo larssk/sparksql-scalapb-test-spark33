@@ -1,16 +1,8 @@
 package myexample
 
 import com.example.protos.demo._
-
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{Dataset, SparkSession}
 import scalapb.spark.Implicits._
-import scalapb.spark.ProtoSQL
 
 object RunDemo {
 
@@ -19,7 +11,7 @@ object RunDemo {
 
     val sc = spark.sparkContext
     val kafkaServers = "localhost:9092"
-    val kafkaTopic = "persons"
+    val kafkaTopic = "persons-v3"
 
     val produce = false
 
