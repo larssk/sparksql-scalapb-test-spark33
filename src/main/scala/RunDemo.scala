@@ -6,14 +6,13 @@ import scalapb.spark.Implicits._
 
 object RunDemo {
 
-  def main(Args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder().appName("ScalaPB Demo").config("spark.master", "local").getOrCreate()
 
-    val sc = spark.sparkContext
-    val kafkaServers = "localhost:9092"
-    val kafkaTopic = "persons-v3"
-
-    val produce = false
+    //val sc = spark.sparkContext
+    val kafkaServers = sys.env.getOrElse("KAFKA_SERVER", "localhost:9092")
+    val kafkaTopic = sys.env.getOrElse("KAFKA_TOPIC", "persons-v3")
+    val produce: Boolean = sys.env.getOrElse("PRODUCE", "false").toBoolean
 
     if (produce) {
       val personsDS2: Dataset[Person] = spark.createDataset(testData)
