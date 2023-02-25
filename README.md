@@ -16,7 +16,6 @@ Test project for SparkSQL and ScalaPB.
 
 2. Produce some messages to kafka
 
-
    ```
    export KAFKA_SERVER=localhost:9092
    export KAFKA_TOPIC=persons-v1
@@ -27,7 +26,7 @@ Test project for SparkSQL and ScalaPB.
 
    ```
 
-3. Consume from kafka for Spark 3.3.0:
+3. Consume from kafka for Spark 3.3.0 (fails):
 
 ```
 
